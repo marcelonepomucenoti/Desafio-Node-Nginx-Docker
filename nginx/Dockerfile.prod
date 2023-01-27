@@ -1,0 +1,18 @@
+FROM nginx AS builder
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Add DockerRize
+RUN apt-get update && apt-get install -y wget
+COPY nginx.conf /etc/nginx/conf.d
+ENV DOCKERIZE_VERSION v0.6.1
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+FROM nginx:alpine
+RUN rm /etc/nginx/conf.d/default.conf
+ENV DOCKERIZE_VERSION v0.6.1
+COPY --from=builder /etc/nginx /etc/nginx
+COPY --from=builder /usr/local/bin/dockerize /usr/local/bin
+ENTRYPOINT ["dockerize", "-wait" , "tcp://app:3000", "-timeout", "20s", "/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
