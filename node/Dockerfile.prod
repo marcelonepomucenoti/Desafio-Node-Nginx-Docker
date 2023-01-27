@@ -19,5 +19,5 @@ COPY --from=builder /usr/src/app .
 COPY --from=builder /usr/local/bin/dockerize /usr/local/bin
 ENV DOCKERIZE_VERSION v0.6.1
 EXPOSE 3000
-ENTRYPOINT ["dockerize", "-wait" , "tcp://db:3306", "-timeout", "20s"]
+ENTRYPOINT ["dockerize", "-wait" , "tcp://db:3306", "-timeout", "15s"]
 CMD ["node", "index.js"]
